@@ -3,7 +3,7 @@ import { Search, Filter, Calendar, ReceiptText, Warehouse, User, LayoutGrid, Pac
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 
-type ReportType = 'sale' | 'product' | 'income';
+type ReportType = 'sale' | 'product' | 'income' | 'profit';
 
 interface SaleReportItem {
   id: string;
@@ -47,6 +47,19 @@ interface IncomeReportItem {
   amount: string;
   paymentMethod: string;
   reference: string;
+}
+
+interface ProfitReportItem {
+  id: string;
+  product: string;
+  category: string;
+  qtySold: number;
+  price: string;
+  cost: string;
+  revenue: string;
+  totalCost: string;
+  profit: string;
+  margin: string;
 }
 
 const MOCK_SALE_DATA: SaleReportItem[] = [
@@ -155,6 +168,33 @@ const MOCK_INCOME_DATA: IncomeReportItem[] = [
   }
 ];
 
+const MOCK_PROFIT_DATA: ProfitReportItem[] = [
+  {
+    id: '1',
+    product: 'Ice Cappuccino',
+    category: 'COFFEE & CHOCOLATE',
+    qtySold: 0,
+    price: '$0.00',
+    cost: '$0.00',
+    revenue: '$0.00',
+    totalCost: '$0.00',
+    profit: '$0.00',
+    margin: '0.00%'
+  },
+  {
+    id: '2',
+    product: 'Ice Espresso',
+    category: 'COFFEE & CHOCOLATE',
+    qtySold: 2,
+    price: '$2.00',
+    cost: '$0.00',
+    revenue: '$4.00',
+    totalCost: '$0.00',
+    profit: '$4.00',
+    margin: '100.00%'
+  }
+];
+
 export default function ReportPage() {
   const [activeReport, setActiveReport] = useState<ReportType | 'menu'>('menu');
   const [searchQuery, setSearchQuery] = useState('');
@@ -167,9 +207,11 @@ export default function ReportPage() {
         return <TotalProductSoldReport searchQuery={searchQuery} onBack={() => setActiveReport('menu')} />;
       case 'income':
         return <TotalIncomeReport searchQuery={searchQuery} onBack={() => setActiveReport('menu')} />;
+      case 'profit':
+        return <ProfitLossReport searchQuery={searchQuery} onBack={() => setActiveReport('menu')} />;
       default:
         return (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <MenuCard 
               title="Total Sale" 
               description="View all sales transactions and summaries"
@@ -191,6 +233,13 @@ export default function ReportPage() {
               color="bg-tertiary"
               onClick={() => setActiveReport('income')}
             />
+            <MenuCard 
+              title="Loss & Profit" 
+              description="Analyze revenue, costs, and profitability"
+              icon={<BarChart3 className="w-8 h-8" />}
+              color="bg-rose-500"
+              onClick={() => setActiveReport('profit')}
+            />
           </div>
         );
     }
@@ -211,7 +260,8 @@ export default function ReportPage() {
           <h2 className="text-2xl font-extrabold font-headline tracking-tight">
             {activeReport === 'menu' ? 'Reports Menu' : 
              activeReport === 'sale' ? 'Total Sale Report' :
-             activeReport === 'product' ? 'Product Sold Report' : 'Total Income Report'}
+             activeReport === 'product' ? 'Product Sold Report' : 
+             activeReport === 'profit' ? 'Profit & Loss Report' : 'Total Income Report'}
           </h2>
         </div>
         {activeReport !== 'menu' && (
@@ -268,6 +318,278 @@ function MenuCard({ title, description, icon, color, onClick }: { title: string,
         Open Report <ChevronRight className="w-4 h-4" />
       </div>
     </motion.button>
+  );
+}
+
+function ProfitLossReport({ searchQuery, onBack }: { searchQuery: string, onBack: () => void }) {
+  const [startDate, setStartDate] = useState('mm/dd/yyyy');
+  const [endDate, setEndDate] = useState('mm/dd/yyyy');
+  const [category, setCategory] = useState('All Categories');
+  const [product, setProduct] = useState('All Products');
+
+  const filteredData = MOCK_PROFIT_DATA.filter(item =>
+    item.product.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.category.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const summary = {
+    revenue: 13.00,
+    purchase: 0.00,
+    grossProfit: 13.00,
+    margin: '100.00%',
+    otherIncome: 0.00,
+    otherExpense: 0.00,
+    netProfit: 13.00
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header & Actions */}
+      <div className="bg-surface-container-lowest rounded-3xl p-6 shadow-sm border border-surface-container/50">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <div>
+            <h3 className="text-xl font-extrabold font-headline tracking-tight">Profit & Loss Report</h3>
+            <p className="text-sm text-on-surface-variant">Analyze revenue, costs, and profitability</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <ExportButton icon={<Printer className="w-4 h-4" />} label="Print" onClick={() => window.print()} />
+            <ExportButton icon={<BarChart3 className="w-4 h-4" />} label="Excel" />
+            <ExportButton icon={<ReceiptText className="w-4 h-4" />} label="PDF" />
+            <ExportButton icon={<LayoutGrid className="w-4 h-4" />} label="Word" />
+          </div>
+        </div>
+
+        {/* Filters Grid */}
+        <div className="grid grid-cols-2 gap-4 pt-6 border-t border-surface-container print:hidden">
+          <FilterSelect label="Category" value={category} onChange={setCategory} options={['All Categories', 'COFFEE & CHOCOLATE', 'FOOD']} icon={<Tag className="w-3 h-3" />} />
+          <FilterSelect label="Product" value={product} onChange={setProduct} options={['All Products', 'Ice Espresso', 'Ice Cappuccino']} icon={<Package className="w-3 h-3" />} />
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest flex items-center gap-2">
+              <Calendar className="w-3 h-3" /> Start Date
+            </label>
+            <input type="text" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="w-full px-3 py-2 bg-surface-container-low rounded-xl text-xs border-none focus:ring-2 focus:ring-primary/20 font-medium" />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest flex items-center gap-2">
+              <Calendar className="w-3 h-3" /> End Date
+            </label>
+            <input type="text" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="w-full px-3 py-2 bg-surface-container-low rounded-xl text-xs border-none focus:ring-2 focus:ring-primary/20 font-medium" />
+          </div>
+        </div>
+
+        {/* Quick Date Selectors */}
+        <div className="grid grid-cols-3 gap-2 mt-4 print:hidden">
+          {['Today', 'This Month', 'This Quarter', 'This Semester', 'This Year'].map(label => (
+            <button key={label} className="px-3 py-2 bg-surface-container-low hover:bg-primary/10 hover:text-primary rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all text-center">
+              {label}
+            </button>
+          ))}
+          <button className="px-3 py-2 text-red-500 bg-red-50 hover:bg-red-100 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all text-center">Clear</button>
+        </div>
+      </div>
+
+      {/* Summary Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 print:hidden">
+        <SummaryCard label="Total Revenue" value={`$${summary.revenue.toFixed(2)}`} icon={<DollarSign className="w-6 h-6" />} color="bg-blue-500" />
+        <SummaryCard label="Total Purchase" value={`$${summary.purchase.toFixed(2)}`} icon={<ShoppingBag className="w-6 h-6" />} color="bg-amber-500" />
+        <div className="bg-emerald-500 text-white rounded-3xl p-6 shadow-lg shadow-emerald-500/20">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] font-bold uppercase tracking-widest opacity-80">Gross Profit</p>
+            <TrendingUp className="w-6 h-6 opacity-80" />
+          </div>
+          <p className="text-3xl font-extrabold font-headline tracking-tight">${summary.grossProfit.toFixed(2)}</p>
+          <p className="text-[10px] font-bold mt-2 bg-white/20 inline-block px-2 py-0.5 rounded-full">Margin: {summary.margin}</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 print:hidden">
+        <div className="bg-surface-container-lowest rounded-3xl p-6 border border-surface-container/50">
+          <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Total Other Income</p>
+          <p className="text-2xl font-extrabold text-on-surface">${summary.otherIncome.toFixed(2)}</p>
+        </div>
+        <div className="bg-surface-container-lowest rounded-3xl p-6 border border-surface-container/50">
+          <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Total Other Expense</p>
+          <p className="text-2xl font-extrabold text-on-surface">${summary.otherExpense.toFixed(2)}</p>
+        </div>
+        <div className="bg-primary text-white rounded-3xl p-6 shadow-lg shadow-primary/20">
+          <p className="text-[10px] font-bold uppercase tracking-widest opacity-80 mb-1">Net Profit</p>
+          <p className="text-2xl font-extrabold">${summary.netProfit.toFixed(2)}</p>
+          <p className="text-[8px] font-medium mt-1 opacity-70 italic">Gross Profit + Other Income - Other Expense</p>
+        </div>
+      </div>
+
+      {/* Breakdown Table */}
+      <div className="space-y-4 print:hidden">
+        <div className="flex items-center justify-between px-2">
+          <h4 className="text-sm font-bold font-headline uppercase tracking-widest text-on-surface-variant">Product-wise Profit Breakdown</h4>
+          <span className="text-[10px] font-bold bg-surface-container px-2 py-1 rounded-full">{filteredData.length} Items</span>
+        </div>
+        <div className="grid grid-cols-1 gap-4">
+          {filteredData.map((item) => (
+            <div key={item.id}>
+              <ProfitCard item={item} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Print Template */}
+      <ProfitLossPrintTemplate data={filteredData} summary={summary} />
+    </div>
+  );
+}
+
+function ProfitCard({ item }: { item: ProfitReportItem }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      className="bg-surface-container-lowest rounded-3xl p-5 shadow-sm border border-surface-container/50 hover:shadow-md transition-all group"
+    >
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
+            <Package className="w-6 h-6" />
+          </div>
+          <div>
+            <h4 className="text-base font-bold text-on-surface leading-tight">{item.product}</h4>
+            <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{item.category}</p>
+          </div>
+        </div>
+        <div className="text-right">
+          <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Profit</span>
+          <p className="text-lg font-extrabold text-emerald-600">{item.profit}</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-4 pt-4 border-t border-surface-container/50">
+        <div className="space-y-0.5">
+          <span className="text-[8px] font-bold text-on-surface-variant uppercase tracking-tighter">Qty Sold</span>
+          <p className="text-xs font-bold text-on-surface">{item.qtySold}</p>
+        </div>
+        <div className="space-y-0.5">
+          <span className="text-[8px] font-bold text-on-surface-variant uppercase tracking-tighter">Price</span>
+          <p className="text-xs font-bold text-on-surface">{item.price}</p>
+        </div>
+        <div className="space-y-0.5">
+          <span className="text-[8px] font-bold text-on-surface-variant uppercase tracking-tighter">Cost</span>
+          <p className="text-xs font-bold text-on-surface">{item.cost}</p>
+        </div>
+        <div className="space-y-0.5">
+          <span className="text-[8px] font-bold text-on-surface-variant uppercase tracking-tighter">Revenue</span>
+          <p className="text-xs font-bold text-on-surface">{item.revenue}</p>
+        </div>
+        <div className="space-y-0.5">
+          <span className="text-[8px] font-bold text-on-surface-variant uppercase tracking-tighter">Total Cost</span>
+          <p className="text-xs font-bold text-on-surface">{item.totalCost}</p>
+        </div>
+        <div className="space-y-0.5">
+          <span className="text-[8px] font-bold text-on-surface-variant uppercase tracking-tighter">Margin %</span>
+          <p className="text-xs font-bold text-emerald-600">{item.margin}</p>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function ProfitLossPrintTemplate({ data, summary }: { data: ProfitReportItem[], summary: any }) {
+  const now = new Date();
+  const formattedDate = now.toLocaleDateString();
+  const formattedTime = now.toLocaleTimeString();
+
+  return (
+    <div className="hidden print:block p-8 bg-white text-black font-sans text-[10px]">
+      {/* Header */}
+      <div className="flex justify-between items-start mb-6">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-gray-200 flex items-center justify-center rounded border border-gray-300">
+            <span className="text-[8px] font-bold">LOGO</span>
+          </div>
+          <div>
+            <h1 className="text-lg font-extrabold uppercase leading-none mb-1">Profit & Loss Report</h1>
+            <p className="text-[8px] text-gray-600">Angkor Wat, Siem Reap - 012969798</p>
+          </div>
+        </div>
+        <div className="text-right">
+          <p className="font-bold text-sm">Neary Khmer</p>
+          <p className="text-[8px] text-gray-600">Generated: {formattedDate} at {formattedTime}</p>
+        </div>
+      </div>
+
+      {/* Summary Section */}
+      <div className="grid grid-cols-3 gap-4 mb-8 border border-gray-300 p-4 rounded bg-gray-50">
+        <div>
+          <p className="text-[8px] font-bold uppercase text-gray-500">Total Revenue</p>
+          <p className="text-base font-extrabold">${summary.revenue.toFixed(2)}</p>
+        </div>
+        <div>
+          <p className="text-[8px] font-bold uppercase text-gray-500">Total Purchase</p>
+          <p className="text-base font-extrabold">${summary.purchase.toFixed(2)}</p>
+        </div>
+        <div>
+          <p className="text-[8px] font-bold uppercase text-gray-500">Gross Profit</p>
+          <p className="text-base font-extrabold">${summary.grossProfit.toFixed(2)}</p>
+          <p className="text-[7px] font-bold">Margin: {summary.margin}</p>
+        </div>
+        <div>
+          <p className="text-[8px] font-bold uppercase text-gray-500">Other Income</p>
+          <p className="text-base font-extrabold">${summary.otherIncome.toFixed(2)}</p>
+        </div>
+        <div>
+          <p className="text-[8px] font-bold uppercase text-gray-500">Other Expense</p>
+          <p className="text-base font-extrabold">${summary.otherExpense.toFixed(2)}</p>
+        </div>
+        <div className="bg-gray-200 p-2 rounded">
+          <p className="text-[8px] font-bold uppercase text-gray-500">Net Profit</p>
+          <p className="text-base font-extrabold">${summary.netProfit.toFixed(2)}</p>
+        </div>
+      </div>
+
+      {/* Table */}
+      <table className="w-full border-collapse border border-gray-300 mb-8">
+        <thead>
+          <tr className="bg-gray-100">
+            <th className="border border-gray-300 p-1 text-left text-[8px] font-bold uppercase">Product</th>
+            <th className="border border-gray-300 p-1 text-left text-[8px] font-bold uppercase">Category</th>
+            <th className="border border-gray-300 p-1 text-center text-[8px] font-bold uppercase">Qty Sold</th>
+            <th className="border border-gray-300 p-1 text-right text-[8px] font-bold uppercase">Price</th>
+            <th className="border border-gray-300 p-1 text-right text-[8px] font-bold uppercase">Cost</th>
+            <th className="border border-gray-300 p-1 text-right text-[8px] font-bold uppercase">Revenue</th>
+            <th className="border border-gray-300 p-1 text-right text-[8px] font-bold uppercase">Total Cost</th>
+            <th className="border border-gray-300 p-1 text-right text-[8px] font-bold uppercase">Profit</th>
+            <th className="border border-gray-300 p-1 text-right text-[8px] font-bold uppercase">Margin %</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((item) => (
+            <tr key={item.id}>
+              <td className="border border-gray-300 p-1 font-bold">{item.product}</td>
+              <td className="border border-gray-300 p-1">{item.category}</td>
+              <td className="border border-gray-300 p-1 text-center">{item.qtySold}</td>
+              <td className="border border-gray-300 p-1 text-right">{item.price}</td>
+              <td className="border border-gray-300 p-1 text-right">{item.cost}</td>
+              <td className="border border-gray-300 p-1 text-right">{item.revenue}</td>
+              <td className="border border-gray-300 p-1 text-right">{item.totalCost}</td>
+              <td className="border border-gray-300 p-1 text-right font-bold">{item.profit}</td>
+              <td className="border border-gray-300 p-1 text-right font-bold text-emerald-700">{item.margin}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* Footer */}
+      <div className="flex justify-between mt-16 px-4">
+        <div className="text-center">
+          <p className="mb-12 font-bold">Verified and Check By: ___________________</p>
+        </div>
+        <div className="text-center">
+          <p className="mb-12 font-bold">Prepared By: ___________________</p>
+        </div>
+      </div>
+      <div className="text-right mt-8 text-[8px] text-gray-500">
+        <p>Page: 1</p>
+      </div>
+    </div>
   );
 }
 
