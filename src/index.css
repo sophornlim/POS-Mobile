@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Manrope:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-headline: "Plus Jakarta Sans", sans-serif;
+
+  --color-primary: #004ddd;
+  --color-primary-container: #7e9cff;
+  --color-on-primary: #f1f2ff;
+  --color-on-primary-container: #001c5e;
+
+  --color-secondary: #652fe7;
+  --color-secondary-container: #d8caff;
+  --color-on-secondary: #f7f0ff;
+  --color-on-secondary-container: #5000d2;
+
+  --color-tertiary: #8f3987;
+  --color-tertiary-container: #fd99ee;
+  --color-on-tertiary: #ffeef8;
+  --color-on-tertiary-container: #651161;
+
+  --color-surface: #f5f6fc;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #eff0f7;
+  --color-surface-container: #e6e8ef;
+  --color-surface-container-high: #e0e2ea;
+  --color-surface-container-highest: #dadde5;
+
+  --color-on-surface: #2c2f33;
+  --color-on-surface-variant: #595b61;
+  --color-outline: #74777c;
+  --color-outline-variant: #abadb3;
+
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
+}
+
+@layer base {
+  html, body {
+    @apply bg-surface text-on-surface font-sans antialiased;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+
+  html::-webkit-scrollbar, body::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, and Opera */
+  }
+}
+
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.glass {
+  @apply bg-white/70 backdrop-blur-2xl;
+}
+
+.main-gradient {
+  background: radial-gradient(circle at top left, rgba(126, 156, 255, 0.15) 0%, transparent 40%),
+              radial-gradient(circle at bottom right, rgba(253, 153, 238, 0.15) 0%, transparent 40%);
+}
+
+.primary-gradient {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-container) 100%);
+}
