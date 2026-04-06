@@ -1,5 +1,8 @@
 import { Table, TableCategory, Category, Product, SubCategory } from './types';
 
+// Note: Replace this URL with your official logo URL when available.
+export const APP_LOGO = "https://lh3.googleusercontent.com/d/1uxjJjv_MN0JuVt3a6pr7_HggFzrOIBKB";
+
 export const TABLE_CATEGORIES: TableCategory[] = [
   { id: 'all', name: 'All' },
   { id: 'vip', name: 'VIP' },

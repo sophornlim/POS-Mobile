@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Search, Filter, Calendar, ReceiptText, Warehouse, User, LayoutGrid, Package, Tag, DollarSign, CreditCard, ChevronRight, BarChart3, TrendingUp, ShoppingBag, Wallet, AlertCircle, Printer } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
+import { APP_LOGO } from '../constants';
+import Logo from './Logo';
 
 type ReportType = 'sale' | 'product' | 'income' | 'profit';
 
@@ -502,9 +504,7 @@ function ProfitLossPrintTemplate({ data, summary }: { data: ProfitReportItem[], 
       {/* Header */}
       <div className="flex justify-between items-start mb-6">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gray-200 flex items-center justify-center rounded border border-gray-300">
-            <span className="text-[8px] font-bold">LOGO</span>
-          </div>
+          <Logo containerClassName="w-12 h-12" />
           <div>
             <h1 className="text-lg font-extrabold uppercase leading-none mb-1">Profit & Loss Report</h1>
             <p className="text-[8px] text-gray-600">Angkor Wat, Siem Reap - 012969798</p>
@@ -834,9 +834,7 @@ function ProductStockPrintTemplate({ data }: { data: ProductSoldReportItem[] }) 
       {/* Header */}
       <div className="flex justify-between items-start mb-6">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gray-200 flex items-center justify-center rounded border border-gray-300">
-            <span className="text-[8px] font-bold">LOGO</span>
-          </div>
+          <Logo containerClassName="w-12 h-12" />
           <div>
             <h1 className="text-lg font-extrabold uppercase leading-none mb-1">Product Stock Report</h1>
             <p className="text-[8px] text-gray-600">Angkor Wat, Siem Reap - 012969798</p>

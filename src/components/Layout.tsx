@@ -1,6 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Menu, ShoppingCart, LayoutGrid, ReceiptText, Package, BarChart3, Settings } from 'lucide-react';
 import { cn } from '../lib/utils';
+import Sidebar from './Sidebar';
+import Logo from './Logo';
+
+import { APP_LOGO } from '../constants';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -8,30 +12,45 @@ interface LayoutProps {
   onTabChange: (tab: string) => void;
   title?: string;
   rightElement?: React.ReactNode;
+  onLogout?: () => void;
 }
 
-export default function Layout({ children, activeTab, onTabChange, title = "Neary Khmer", rightElement }: LayoutProps) {
+export default function Layout({ children, activeTab, onTabChange, title = "Neary Khmer", rightElement, onLogout }: LayoutProps) {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   return (
     <div className="min-h-screen flex flex-col main-gradient pb-20 scrollbar-hide">
+      {/* Sidebar */}
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} onLogout={onLogout} />
+
       {/* Top Bar */}
-      <header className="fixed top-0 left-0 right-0 h-16 glass z-50 flex items-center justify-between px-6 shadow-sm print:hidden">
-        <div className="flex items-center gap-4">
-          <button className="p-2 hover:bg-surface-container rounded-full transition-colors">
+      <header className="fixed top-0 left-0 right-0 h-16 glass z-50 flex items-center px-6 shadow-sm print:hidden">
+        {/* Left: Sidebar Trigger */}
+        <div className="flex items-center w-1/3">
+          <button 
+            onClick={() => setIsSidebarOpen(true)}
+            className="p-2 hover:bg-surface-container rounded-full transition-all active:scale-95"
+          >
             <Menu className="w-6 h-6 text-on-surface" />
           </button>
-          <h1 className="text-xl font-bold font-headline tracking-tight text-on-surface">{title}</h1>
         </div>
-        <div className="flex items-center gap-2">
+
+        {/* Center: Title */}
+        <div className="flex-1 flex justify-center overflow-hidden">
+          <h1 className="text-lg font-black font-headline tracking-tight text-on-surface leading-none text-center truncate">
+            {title}
+          </h1>
+        </div>
+
+        {/* Right: Logo */}
+        <div className="flex items-center justify-end w-1/3 gap-3">
           {rightElement}
-          <button className="p-2 hover:bg-surface-container rounded-full transition-colors relative">
-            <ShoppingCart className="w-6 h-6 text-primary" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-tertiary rounded-full border-2 border-white"></span>
-          </button>
+          <Logo containerClassName="w-10 h-10" />
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 pt-24 px-6 max-w-md mx-auto w-full scrollbar-hide">
+      <main className="flex-1 pt-24 px-6 max-w-6xl mx-auto w-full scrollbar-hide">
         {children}
       </main>
 

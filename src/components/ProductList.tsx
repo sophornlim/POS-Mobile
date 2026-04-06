@@ -37,49 +37,59 @@ export default function ProductList({ onCheckout, subCategoryId, onBack }: { onC
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {filteredProducts.map((product) => (
-          <div key={product.id} className="bg-surface-container-lowest rounded-3xl p-4 flex flex-col gap-4 shadow-sm group">
-            <div className="relative aspect-video rounded-2xl overflow-hidden bg-surface-container">
+          <motion.button 
+            key={product.id} 
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              // Logic to add to cart would go here
+              console.log(`Added ${product.name} to cart`);
+            }}
+            className="bg-surface-container-lowest rounded-3xl p-3 flex flex-col gap-3 shadow-sm group text-left border border-transparent hover:border-primary/20 transition-all"
+          >
+            <div className="relative aspect-square rounded-2xl overflow-hidden bg-surface-container">
               <img 
                 src={product.image} 
                 alt={product.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 referrerPolicy="no-referrer"
               />
-              <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-primary font-headline">
+              <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-md px-2 py-0.5 rounded-full text-[10px] font-bold text-primary font-headline shadow-sm">
                 ${product.price.toFixed(2)}
               </div>
-            </div>
-            <div className="px-2 pb-2">
-              <div className="flex justify-between items-start mb-1">
-                <div>
-                  <h3 className="font-headline font-bold text-lg text-on-surface">{product.name}</h3>
-                  {product.nameKh && <p className="text-primary font-bold text-sm -mt-1">{product.nameKh}</p>}
-                  {product.code && <p className="text-[10px] text-on-surface-variant font-mono uppercase tracking-wider mt-1">Code: {product.code}</p>}
+              <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-colors flex items-center justify-center">
+                <div className="bg-white rounded-full p-2 shadow-lg opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-300">
+                  <Plus className="w-5 h-5 text-primary" />
                 </div>
-                {product.isVegetarian && <Leaf className="w-5 h-5 text-emerald-500" />}
               </div>
-              <p className="text-on-surface-variant text-sm mb-4 leading-relaxed">{product.description}</p>
+            </div>
+            <div className="px-1">
+              <div className="flex justify-between items-start mb-0.5">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-headline font-bold text-sm text-on-surface truncate">{product.name}</h3>
+                  {product.nameKh && <p className="text-primary font-bold text-[10px] -mt-0.5 truncate">{product.nameKh}</p>}
+                </div>
+                {product.isVegetarian && <Leaf className="w-3 h-3 text-emerald-500 shrink-0 ml-1" />}
+              </div>
+              {product.code && <p className="text-[8px] text-on-surface-variant font-mono uppercase tracking-wider">Code: {product.code}</p>}
               
-              {product.id === 'p3' ? (
-                <div className="flex gap-2">
-                  <button className="flex-1 bg-surface-container-low text-primary py-3.5 rounded-xl font-headline font-bold flex items-center justify-center">
-                    <Minus className="w-5 h-5" />
+              <div className="mt-3 flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <button className="w-6 h-6 rounded-lg bg-surface-container-low flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-colors">
+                    <Minus className="w-3 h-3" />
                   </button>
-                  <div className="flex-[2] bg-surface-container-low flex items-center justify-center font-bold font-headline text-lg">1</div>
-                  <button className="flex-1 primary-gradient text-white py-3.5 rounded-xl font-headline font-bold flex items-center justify-center">
-                    <Plus className="w-5 h-5" />
+                  <span className="text-xs font-bold font-headline">0</span>
+                  <button className="w-6 h-6 rounded-lg primary-gradient flex items-center justify-center text-white">
+                    <Plus className="w-3 h-3" />
                   </button>
                 </div>
-              ) : (
-                <button className="w-full primary-gradient text-white py-3.5 rounded-xl font-headline font-bold flex items-center justify-center gap-2 active:scale-95 transition-transform">
-                  <Plus className="w-5 h-5" />
-                  Add to Order
-                </button>
-              )}
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
+                  <Plus className="w-4 h-4" />
+                </div>
+              </div>
             </div>
-          </div>
+          </motion.button>
         ))}
       </div>
 
