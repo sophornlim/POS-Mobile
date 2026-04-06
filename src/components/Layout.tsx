@@ -42,10 +42,9 @@ export default function Layout({ children, activeTab, onTabChange, title = "Near
           </h1>
         </div>
 
-        {/* Right: Logo */}
-        <div className="flex items-center justify-end w-1/3 gap-3">
+        {/* Right: Actions */}
+        <div className="flex items-center justify-end w-1/3">
           {rightElement}
-          <Logo containerClassName="w-10 h-10" />
         </div>
       </header>
 

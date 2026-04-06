@@ -11,7 +11,10 @@ import ReportPage from './components/ReportPage';
 import SettingPage from './components/SettingPage';
 import SplashScreen from './components/SplashScreen';
 import LoginPage from './components/LoginPage';
+import PendingOrders from './components/PendingOrders';
 import { AnimatePresence, motion } from 'motion/react';
+import { ShoppingCart } from 'lucide-react';
+import { cn } from './lib/utils';
 
 type Screen = 'tables' | 'categories' | 'products' | 'subcategories' | 'checkout' | 'sale' | 'inventory' | 'report' | 'setting' | 'placeholder';
 
@@ -24,6 +27,30 @@ export default function App() {
 
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [selectedSubCategoryId, setSelectedSubCategoryId] = useState<string | null>(null);
+  const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
+  const [carts, setCarts] = useState<Record<string, Record<string, number>>>({});
+  const [showPendingOrders, setShowPendingOrders] = useState(false);
+
+  const cart = selectedTableId ? (carts[selectedTableId] || {}) : {};
+
+  const updateQuantity = (productId: string, delta: number) => {
+    if (!selectedTableId) return;
+    setCarts(prev => {
+      const tableCart = prev[selectedTableId] || {};
+      const currentQty = tableCart[productId] || 0;
+      const newQty = Math.max(0, currentQty + delta);
+      
+      let updatedTableCart;
+      if (newQty === 0) {
+        const { [productId]: _, ...rest } = tableCart;
+        updatedTableCart = rest;
+      } else {
+        updatedTableCart = { ...tableCart, [productId]: newQty };
+      }
+
+      return { ...prev, [selectedTableId]: updatedTableCart };
+    });
+  };
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
@@ -46,9 +73,13 @@ export default function App() {
   const renderScreen = () => {
     switch (currentScreen) {
       case 'tables':
-        return <TableGrid onSelect={(id) => {
-          setCurrentScreen('categories');
-        }} />;
+        return <TableGrid 
+          carts={carts}
+          onSelect={(id) => {
+            setSelectedTableId(id);
+            setCurrentScreen('categories');
+          }} 
+        />;
       case 'categories':
         return <CategoryGrid onSelect={(id) => {
           setSelectedCategoryId(id);
@@ -57,6 +88,8 @@ export default function App() {
       case 'products':
         return <ProductList 
           subCategoryId={selectedSubCategoryId}
+          cart={cart}
+          onUpdateQuantity={updateQuantity}
           onBack={() => setCurrentScreen('subcategories')}
           onCheckout={() => setCurrentScreen('checkout')} 
         />;
@@ -70,7 +103,20 @@ export default function App() {
           }}
         />;
       case 'checkout':
-        return <Checkout onBack={() => setCurrentScreen('products')} />;
+        return <Checkout 
+          cart={cart}
+          tableId={selectedTableId}
+          onBack={() => setCurrentScreen('products')} 
+          onClearCart={() => {
+            if (selectedTableId) {
+              setCarts(prev => {
+                const { [selectedTableId]: _, ...rest } = prev;
+                return rest;
+              });
+              setCurrentScreen('tables');
+            }
+          }}
+        />;
       case 'sale':
         return <SalesPage />;
       case 'inventory':
@@ -87,7 +133,13 @@ export default function App() {
           </div>
         );
       default:
-        return <TableGrid onSelect={() => setCurrentScreen('categories')} />;
+        return <TableGrid 
+          carts={carts}
+          onSelect={(id) => {
+            setSelectedTableId(id);
+            setCurrentScreen('categories');
+          }} 
+        />;
     }
   };
 
@@ -102,10 +154,21 @@ export default function App() {
   };
 
   const getRightElement = () => {
-    if (currentScreen === 'checkout') {
-      return <span className="text-primary font-bold font-headline mr-2">Table 14</span>;
-    }
-    return null;
+    const pendingCount = Object.values(carts).filter(c => Object.keys(c).length > 0).length;
+    
+    return (
+      <button 
+        onClick={() => setShowPendingOrders(true)}
+        className="relative p-2 hover:bg-surface-container rounded-full transition-colors"
+      >
+        <ShoppingCart className="w-6 h-6 text-on-surface" />
+        {pendingCount > 0 && (
+          <span className="absolute top-0 right-0 w-5 h-5 bg-primary text-on-primary text-[10px] font-black flex items-center justify-center rounded-full ring-2 ring-surface shadow-lg">
+            {pendingCount}
+          </span>
+        )}
+      </button>
+    );
   };
 
   return (
@@ -113,6 +176,20 @@ export default function App() {
       <AnimatePresence>
         {!isSplashDone && (
           <SplashScreen onComplete={() => setIsSplashDone(true)} />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showPendingOrders && (
+          <PendingOrders 
+            carts={carts} 
+            onClose={() => setShowPendingOrders(false)}
+            onSelectTable={(tableId) => {
+              setSelectedTableId(tableId);
+              setShowPendingOrders(false);
+              setCurrentScreen('checkout');
+            }}
+          />
         )}
       </AnimatePresence>
 

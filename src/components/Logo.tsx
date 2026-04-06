@@ -20,11 +20,11 @@ const Logo: React.FC<LogoProps> = ({ className, containerClassName }) => {
   }
 
   return (
-    <div className={cn("flex items-center justify-center overflow-hidden border-0 outline-none bg-transparent p-0 shadow-none", containerClassName)}>
+    <div className={cn("flex items-center justify-center overflow-hidden bg-white mix-blend-multiply", containerClassName)}>
       <img 
         src={APP_LOGO} 
         alt="Neary Khmer Logo" 
-        className={cn("w-full h-full object-contain border-0 outline-none block p-0 m-0 mix-blend-multiply contrast-[1.1] brightness-[1.05]", className)}
+        className={cn("w-full h-full object-contain contrast-[1.2] brightness-[1.1]", className)}
         referrerPolicy="no-referrer"
         onError={() => setError(true)}
       />

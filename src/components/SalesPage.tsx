@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Search, Filter, Eye, Printer, Trash2, X, Calendar, User, DollarSign, Percent, Briefcase, Activity, ChevronLeft } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
+import Logo from './Logo';
+import { APP_LOGO } from '../constants';
 
 interface InvoiceItem {
   productName: string;
@@ -77,6 +79,62 @@ const MOCK_SALES: SaleRecord[] = [
 
 export default function SalesPage() {
   const [selectedInvoice, setSelectedInvoice] = useState<SaleRecord | null>(null);
+
+  const handlePrint = (invoice: SaleRecord) => {
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write('<html><head><title>Invoice</title>');
+      printWindow.document.write('<style>');
+      printWindow.document.write('@page { margin: 0; }');
+      printWindow.document.write('body { font-family: "Courier New", Courier, monospace; width: 80mm; padding: 4mm; margin: 0; font-size: 12px; line-height: 1.4; color: #000; }');
+      printWindow.document.write('.logo { width: 35mm; height: auto; margin: 0 auto 4mm; display: block; object-fit: contain; mix-blend-mode: multiply; }');
+      printWindow.document.write('.header { text-align: center; margin-bottom: 6mm; border-bottom: 1px dashed #000; padding-bottom: 4mm; }');
+      printWindow.document.write('.header h1 { font-size: 18px; margin: 0 0 2mm; font-weight: bold; }');
+      printWindow.document.write('.header p { font-size: 10px; margin: 1mm 0; line-height: 1.2; }');
+      printWindow.document.write('.details { margin-bottom: 4mm; font-size: 11px; }');
+      printWindow.document.write('.details p { margin: 1mm 0; display: flex; justify-content: space-between; }');
+      printWindow.document.write('table { width: 100%; border-collapse: collapse; margin-bottom: 4mm; }');
+      printWindow.document.write('th { text-align: left; padding: 2mm 0; border-bottom: 1px solid #000; font-size: 11px; text-transform: uppercase; }');
+      printWindow.document.write('td { text-align: left; padding: 2mm 0; border-bottom: 1px dashed #ccc; font-size: 11px; }');
+      printWindow.document.write('.total-section { text-align: right; margin-top: 4mm; border-top: 1px solid #000; padding-top: 2mm; }');
+      printWindow.document.write('.total-section p { margin: 1mm 0; font-size: 11px; display: flex; justify-content: space-between; }');
+      printWindow.document.write('.total-section h3 { margin: 2mm 0; font-size: 15px; font-weight: bold; display: flex; justify-content: space-between; }');
+      printWindow.document.write('.footer { text-align: center; margin-top: 8mm; font-size: 10px; border-top: 1px dashed #000; padding-top: 4mm; font-style: italic; }');
+      printWindow.document.write('</style>');
+      printWindow.document.write('</head><body>');
+      printWindow.document.write('<div class="header">');
+      printWindow.document.write(`<img src="${APP_LOGO}" class="logo" referrerPolicy="no-referrer" />`);
+      printWindow.document.write('<h1>Neary Khmer POS</h1>');
+      printWindow.document.write('<p>#123, Street 456, Sangkat Boeung Keng Kang I,<br/>Khan Chamkarmon, Phnom Penh, Cambodia</p>');
+      printWindow.document.write('<p>Contact: +855 12 345 678 / +855 98 765 432</p>');
+      printWindow.document.write('</div>');
+      printWindow.document.write('<div class="details">');
+      printWindow.document.write(`<p><span>Order:</span> <strong>${invoice.invoiceCode}</strong></p>`);
+      printWindow.document.write(`<p><span>Date:</span> ${invoice.date}</p>`);
+      printWindow.document.write(`<p><span>Customer:</span> ${invoice.customer}</p>`);
+      printWindow.document.write(`<p><span>Rate:</span> ៛${invoice.exchangeRate} / $1</p>`);
+      printWindow.document.write('</div>');
+      printWindow.document.write('<table><thead><tr><th>Item</th><th style="text-align:right">Price</th></tr></thead><tbody>');
+      invoice.items.forEach(item => {
+        printWindow.document.write(`<tr><td>${item.productName} (x${item.quantity})</td><td style="text-align:right">${item.price}</td></tr>`);
+      });
+      printWindow.document.write('</tbody></table>');
+      printWindow.document.write('<div class="total-section">');
+      printWindow.document.write(`<p><span>Discount:</span> <span>${invoice.discount}</span></p>`);
+      printWindow.document.write(`<p><span>Tax:</span> <span>${invoice.tax}</span></p>`);
+      printWindow.document.write(`<p><span>Commission:</span> <span>${invoice.commission}</span></p>`);
+      printWindow.document.write(`<h3><span>Total:</span> <span>${invoice.totalAmount}</span></h3>`);
+      printWindow.document.write(`<h3><span>Total Riel:</span> <span>${invoice.totalRiel}</span></h3>`);
+      printWindow.document.write('</div>');
+      printWindow.document.write('<div class="footer">');
+      printWindow.document.write('<p>Thank you for dining with Neary Khmer!</p>');
+      printWindow.document.write('<p>Please come again!</p>');
+      printWindow.document.write('</div>');
+      printWindow.document.write('</body></html>');
+      printWindow.document.close();
+      printWindow.print();
+    }
+  };
 
   if (selectedInvoice) {
     return (
@@ -182,8 +240,11 @@ export default function SalesPage() {
         </section>
 
         <div className="flex gap-4">
-          <button className="flex-1 primary-gradient text-white h-14 rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-95 transition-all shadow-lg shadow-primary/20">
-            <Printer className="w-5 h-5" />
+          <button 
+            onClick={() => handlePrint(selectedInvoice)}
+            className="flex-1 primary-gradient text-white h-14 rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-95 transition-all shadow-lg shadow-primary/20"
+          >
+            <Logo containerClassName="w-5 h-5" />
             Print Invoice
           </button>
           <button className="px-6 bg-surface-container-low text-red-500 h-14 rounded-2xl font-bold flex items-center justify-center active:scale-95 transition-all">
@@ -260,8 +321,11 @@ export default function SalesPage() {
                 <Eye className="w-4 h-4" />
                 View Detail
               </button>
-              <button className="p-2.5 bg-surface-container-low text-on-surface-variant rounded-xl hover:bg-surface-container transition-all active:scale-95">
-                <Printer className="w-4 h-4" />
+              <button 
+                onClick={() => handlePrint(sale)}
+                className="p-2.5 bg-surface-container-low text-on-surface-variant rounded-xl hover:bg-surface-container transition-all active:scale-95"
+              >
+                <Logo containerClassName="w-4 h-4" />
               </button>
               <button className="p-2.5 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 transition-all active:scale-95">
                 <Trash2 className="w-4 h-4" />

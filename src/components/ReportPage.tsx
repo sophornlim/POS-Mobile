@@ -354,7 +354,7 @@ function ProfitLossReport({ searchQuery, onBack }: { searchQuery: string, onBack
             <p className="text-sm text-on-surface-variant">Analyze revenue, costs, and profitability</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <ExportButton icon={<Printer className="w-4 h-4" />} label="Print" onClick={() => window.print()} />
+            <ExportButton icon={<Logo containerClassName="w-4 h-4" />} label="Print" onClick={() => window.print()} />
             <ExportButton icon={<BarChart3 className="w-4 h-4" />} label="Excel" />
             <ExportButton icon={<ReceiptText className="w-4 h-4" />} label="PDF" />
             <ExportButton icon={<LayoutGrid className="w-4 h-4" />} label="Word" />
@@ -622,7 +622,7 @@ function TotalSaleReport({ searchQuery, onBack }: { searchQuery: string, onBack:
             <p className="text-sm text-on-surface-variant">View all sales transactions</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <ExportButton icon={<Printer className="w-4 h-4" />} label="Print" />
+            <ExportButton icon={<Logo containerClassName="w-4 h-4" />} label="Print" />
             <ExportButton icon={<BarChart3 className="w-4 h-4" />} label="Excel" />
             <ExportButton icon={<ReceiptText className="w-4 h-4" />} label="PDF" />
             <ExportButton icon={<LayoutGrid className="w-4 h-4" />} label="Word" />
@@ -755,7 +755,7 @@ function TotalProductSoldReport({ searchQuery, onBack }: { searchQuery: string, 
             <p className="text-sm text-on-surface-variant">View all products with details</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <ExportButton icon={<Printer className="w-4 h-4" />} label="Print" onClick={() => window.print()} />
+            <ExportButton icon={<Logo containerClassName="w-4 h-4" />} label="Print" onClick={() => window.print()} />
             <ExportButton icon={<BarChart3 className="w-4 h-4" />} label="Excel" />
             <ExportButton icon={<ReceiptText className="w-4 h-4" />} label="PDF" />
             <ExportButton icon={<LayoutGrid className="w-4 h-4" />} label="Word" />
@@ -937,7 +937,7 @@ function TotalIncomeReport({ searchQuery, onBack }: { searchQuery: string, onBac
             <p className="text-sm text-on-surface-variant">Income summary with opening and closing balance</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <ExportButton icon={<Printer className="w-4 h-4" />} label="Print" />
+            <ExportButton icon={<Logo containerClassName="w-4 h-4" />} label="Print" />
             <ExportButton icon={<BarChart3 className="w-4 h-4" />} label="Excel" />
             <ExportButton icon={<ReceiptText className="w-4 h-4" />} label="PDF" />
             <ExportButton icon={<LayoutGrid className="w-4 h-4" />} label="Word" />

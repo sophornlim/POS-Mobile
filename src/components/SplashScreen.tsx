@@ -22,22 +22,6 @@ export default function SplashScreen({ onComplete }: { onComplete: () => void })
         className="relative"
       >
         <Logo containerClassName="w-48 h-48" />
-        <motion.div 
-          initial={{ width: 0 }}
-          animate={{ width: "100%" }}
-          transition={{ duration: 1.5, delay: 0.5 }}
-          className="absolute -bottom-8 left-0 h-1 bg-primary rounded-full"
-        />
-      </motion.div>
-      
-      <motion.div
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.8 }}
-        className="mt-16 text-center"
-      >
-        <h1 className="text-3xl font-black font-headline tracking-tighter text-on-surface mb-2">NEARY KHMER</h1>
-        <p className="text-xs font-bold text-primary uppercase tracking-[0.3em]">Restaurant Management System</p>
       </motion.div>
     </motion.div>
   );

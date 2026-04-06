@@ -7,13 +7,20 @@ import { TableStatus } from '../types';
 
 interface TableGridProps {
   onSelect: (tableId: string) => void;
+  carts: Record<string, Record<string, number>>;
 }
 
-export default function TableGrid({ onSelect }: TableGridProps) {
+export default function TableGrid({ onSelect, carts }: TableGridProps) {
   const [selectedCategoryId, setSelectedCategoryId] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState<TableStatus | 'all'>('all');
 
-  const filteredTables = TABLES.filter(table => {
+  const filteredTables = TABLES.map(table => {
+    const hasItems = carts[table.id] && Object.keys(carts[table.id]).length > 0;
+    return {
+      ...table,
+      status: hasItems ? 'occupied' : table.status
+    };
+  }).filter(table => {
     const categoryMatch = selectedCategoryId === 'all' || table.categoryId === selectedCategoryId;
     const statusMatch = selectedStatus === 'all' || table.status === selectedStatus;
     return categoryMatch && statusMatch;

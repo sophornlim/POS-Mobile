@@ -168,24 +168,24 @@ export default function Sidebar({ isOpen, onClose, onLogout }: SidebarProps) {
             </div>
 
             {/* Footer */}
-            <div className="p-4 border-t border-surface-container bg-surface-container-low/30">
-              <div className="flex items-center gap-2 p-2 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm">
-                <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center text-secondary shrink-0">
-                  <UserCheck className="w-4 h-4" />
+            <div className="p-3 border-t border-surface-container bg-surface-container-low/30">
+              <div className="flex items-center gap-2 p-1.5 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm">
+                <div className="w-7 h-7 rounded-full bg-secondary/10 flex items-center justify-center text-secondary shrink-0">
+                  <UserCheck className="w-3.5 h-3.5" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-black font-headline truncate leading-tight">Sophorn Lim</p>
-                  <p className="text-[8px] text-on-surface-variant truncate leading-tight">Administrator</p>
+                  <p className="text-[9px] font-black font-headline truncate leading-tight">Sophorn Lim</p>
+                  <p className="text-[7px] text-on-surface-variant truncate leading-tight">Administrator</p>
                 </div>
                 <button 
                   onClick={() => {
                     onLogout?.();
                     onClose();
                   }}
-                  className="p-2 rounded-lg text-red-600 hover:bg-red-50 transition-all flex items-center justify-center"
+                  className="p-1.5 rounded-lg text-red-600 hover:bg-red-50 transition-all flex items-center justify-center"
                   title="Logout"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
