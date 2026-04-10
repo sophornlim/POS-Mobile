@@ -15,7 +15,7 @@ interface LayoutProps {
   onLogout?: () => void;
 }
 
-export default function Layout({ children, activeTab, onTabChange, title = "Neary Khmer", rightElement, onLogout }: LayoutProps) {
+export default function Layout({ children, activeTab, onTabChange, title = "Near Khmer", rightElement, onLogout }: LayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (

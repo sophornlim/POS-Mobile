@@ -30,7 +30,7 @@ export default function Checkout({ onBack, cart, tableId, onClearCart }: { onBac
       printWindow.document.write('<style>');
       printWindow.document.write('@page { margin: 0; }');
       printWindow.document.write('body { font-family: "Courier New", Courier, monospace; width: 80mm; padding: 4mm; margin: 0; font-size: 12px; line-height: 1.4; color: #000; }');
-      printWindow.document.write('.logo { width: 35mm; height: auto; margin: 0 auto 4mm; display: block; object-fit: contain; mix-blend-mode: multiply; }');
+      printWindow.document.write('.logo { width: 25mm; height: auto; margin: 0 auto 4mm; display: block; object-fit: contain; mix-blend-mode: multiply; }');
       printWindow.document.write('.header { text-align: center; margin-bottom: 6mm; border-bottom: 1px dashed #000; padding-bottom: 4mm; }');
       printWindow.document.write('.header h1 { font-size: 18px; margin: 0 0 2mm; font-weight: bold; }');
       printWindow.document.write('.header p { font-size: 10px; margin: 1mm 0; line-height: 1.2; }');
@@ -47,7 +47,7 @@ export default function Checkout({ onBack, cart, tableId, onClearCart }: { onBac
       printWindow.document.write('</head><body>');
       printWindow.document.write('<div class="header">');
       printWindow.document.write(`<img src="${APP_LOGO}" class="logo" referrerPolicy="no-referrer" crossorigin="anonymous" />`);
-      printWindow.document.write('<h1>Neary Khmer POS</h1>');
+      printWindow.document.write('<h1>Near Khmer</h1>');
       printWindow.document.write('<p>#123, Street 456, Sangkat Boeung Keng Kang I,<br/>Khan Chamkarmon, Phnom Penh, Cambodia</p>');
       printWindow.document.write('<p>Contact: +855 12 345 678 / +855 98 765 432</p>');
       printWindow.document.write('</div>');
@@ -74,7 +74,7 @@ export default function Checkout({ onBack, cart, tableId, onClearCart }: { onBac
       printWindow.document.write(`<h3><span>Total Riel:</span> <span>៛${totalRiel.toLocaleString()}</span></h3>`);
       printWindow.document.write('</div>');
       printWindow.document.write('<div class="footer">');
-      printWindow.document.write('<p>Thank you for dining with Neary Khmer!</p>');
+      printWindow.document.write('<p>Thank you for dining with Near Khmer!</p>');
       printWindow.document.write('<p>Please come again!</p>');
       printWindow.document.write('</div>');
       printWindow.document.write('</body></html>');

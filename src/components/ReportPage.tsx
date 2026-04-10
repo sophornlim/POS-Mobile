@@ -197,6 +197,188 @@ const MOCK_PROFIT_DATA: ProfitReportItem[] = [
   }
 ];
 
+const handlePrintReport = (id: string) => {
+  const element = document.getElementById(id);
+  if (!element) return;
+
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) {
+    alert('Please allow popups to print reports');
+    return;
+  }
+
+  // Copy all styles from the current document
+  const styles = Array.from(document.querySelectorAll('style'))
+    .map(style => style.innerHTML)
+    .join('\n');
+
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Report - Near Khmer</title>
+        <style>
+          ${styles}
+          @page { size: A4 landscape; margin: 10mm; }
+          body { 
+            background: white !important; 
+            color: black !important; 
+            padding: 15px !important; 
+            font-family: 'Inter', sans-serif;
+            font-size: 8px !important;
+          }
+          .hidden { display: none !important; }
+          .print\\:block { display: block !important; }
+          .landscape-report { display: block !important; width: 100% !important; }
+          /* Ensure borders and colors print correctly */
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          table { width: 100% !important; border-collapse: collapse !important; margin-bottom: 15px !important; }
+          th, td { border: 1px solid black !important; padding: 4px !important; font-size: 8px !important; }
+          img { width: 25mm !important; height: auto !important; }
+          .border-2 { border: 2px solid black !important; }
+          .border-black { border-color: black !important; }
+          h1 { font-size: 14px !important; }
+          h2 { font-size: 12px !important; }
+          h3 { font-size: 10px !important; }
+          .text-base { font-size: 10px !important; }
+          .text-sm { font-size: 9px !important; }
+          .text-lg { font-size: 12px !important; }
+          .text-xl { font-size: 14px !important; }
+          .text-2xl { font-size: 16px !important; }
+        </style>
+      </head>
+      <body>
+        <div class="print:block landscape-report">
+          ${element.innerHTML}
+        </div>
+      </body>
+    </html>
+  `);
+
+  printWindow.document.close();
+  
+  // Wait for images (like the logo) to load before printing
+  const images = printWindow.document.querySelectorAll('img');
+  let loadedCount = 0;
+  
+  const triggerPrint = () => {
+    setTimeout(() => {
+      printWindow.focus();
+      printWindow.print();
+    }, 500);
+  };
+
+  if (images.length === 0) {
+    triggerPrint();
+  } else {
+    images.forEach(img => {
+      if (img.complete) {
+        loadedCount++;
+        if (loadedCount === images.length) triggerPrint();
+      } else {
+        img.onload = () => {
+          loadedCount++;
+          if (loadedCount === images.length) triggerPrint();
+        };
+        img.onerror = () => {
+          loadedCount++;
+          if (loadedCount === images.length) triggerPrint();
+        };
+      }
+    });
+  }
+};
+
+const handleExportToExcel = (data: any[], filename: string) => {
+  if (!data || data.length === 0) return;
+  
+  // Filter out internal IDs or complex objects if necessary
+  const headers = Object.keys(data[0]).filter(key => key !== 'id').join(',');
+  const rows = data.map(row => {
+    return Object.entries(row)
+      .filter(([key]) => key !== 'id')
+      .map(([, val]) => {
+        const stringVal = String(val).replace(/"/g, '""');
+        return `"${stringVal}"`;
+      }).join(',');
+  }).join('\n');
+  
+  const csvContent = "\ufeff" + headers + "\n" + rows; // Add BOM for Excel UTF-8 support
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", `${filename}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+const handleExportToWord = (id: string, filename: string) => {
+  const element = document.getElementById(id);
+  if (!element) return;
+  
+  const html = `
+    <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+    <head><meta charset='utf-8'><title>Export</title>
+    <style>
+      @page Section1 {
+        size: 297mm 210mm;
+        mso-page-orientation: landscape;
+        margin: 1cm 1cm 1cm 1cm;
+      }
+      div.Section1 {
+        page: Section1;
+      }
+      body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 9pt; }
+      table { border-collapse: collapse; width: 100%; margin-bottom: 10pt; }
+      th, td { border: 1px solid black; padding: 4pt; font-size: 8pt; }
+      .hidden { display: none; }
+      .print\\:block { display: block; }
+      .text-center { text-align: center; }
+      .flex { display: block; text-align: center; }
+      .flex-col { display: block; }
+      .items-center { text-align: center; }
+      .justify-center { text-align: center; }
+      .font-bold { font-weight: bold; }
+      .font-black { font-weight: 900; }
+      .uppercase { text-transform: uppercase; }
+      h1 { font-size: 14pt; margin: 0; }
+      h2 { font-size: 12pt; margin: 5pt 0; }
+      p { margin: 2pt 0; }
+      .border-y-2 { border-top: 2px solid black; border-bottom: 2px solid black; }
+      .mb-6 { margin-bottom: 15pt; }
+      .mb-3 { margin-bottom: 8pt; }
+      .mt-1 { margin-top: 5pt; }
+      .mt-2 { margin-top: 10pt; }
+      .py-1.5 { padding-top: 5pt; padding-bottom: 5pt; }
+      .w-full { width: 100%; }
+      .max-w-md { max-width: 400pt; margin-left: auto; margin-right: auto; }
+      .text-gray-600 { color: #4b5563; }
+      .tracking-tighter { letter-spacing: -1pt; }
+      .tracking-widest { letter-spacing: 2pt; }
+      .w-12 { width: 25mm !important; }
+      .h-12 { height: auto !important; }
+      .object-contain { object-fit: contain; }
+    </style>
+    </head>
+    <body>
+      <div class="Section1">
+        ${element.innerHTML}
+      </div>
+    </body>
+    </html>
+  `;
+  
+  const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${filename}.doc`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
 export default function ReportPage() {
   const [activeReport, setActiveReport] = useState<ReportType | 'menu'>('menu');
   const [searchQuery, setSearchQuery] = useState('');
@@ -354,10 +536,10 @@ function ProfitLossReport({ searchQuery, onBack }: { searchQuery: string, onBack
             <p className="text-sm text-on-surface-variant">Analyze revenue, costs, and profitability</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <ExportButton icon={<Logo containerClassName="w-4 h-4" />} label="Print" onClick={() => window.print()} />
-            <ExportButton icon={<BarChart3 className="w-4 h-4" />} label="Excel" />
-            <ExportButton icon={<ReceiptText className="w-4 h-4" />} label="PDF" />
-            <ExportButton icon={<LayoutGrid className="w-4 h-4" />} label="Word" />
+            <ExportButton icon={<Printer className="w-4 h-4" />} label="Print" onClick={() => handlePrintReport('profit-loss-template')} />
+            <ExportButton icon={<BarChart3 className="w-4 h-4" />} label="Excel" onClick={() => handleExportToExcel(filteredData, 'Profit_Loss_Report')} />
+            <ExportButton icon={<ReceiptText className="w-4 h-4" />} label="PDF" onClick={() => handlePrintReport('profit-loss-template')} />
+            <ExportButton icon={<LayoutGrid className="w-4 h-4" />} label="Word" onClick={() => handleExportToWord('profit-loss-template', 'Profit_Loss_Report')} />
           </div>
         </div>
 
@@ -494,30 +676,50 @@ function ProfitCard({ item }: { item: ProfitReportItem }) {
   );
 }
 
-function ProfitLossPrintTemplate({ data, summary }: { data: ProfitReportItem[], summary: any }) {
+function ReportPrintHeader({ title }: { title: string }) {
   const now = new Date();
   const formattedDate = now.toLocaleDateString();
   const formattedTime = now.toLocaleTimeString();
 
   return (
-    <div className="hidden print:block p-8 bg-white text-black font-sans text-[10px]">
-      {/* Header */}
-      <div className="flex justify-between items-start mb-6">
-        <div className="flex items-center gap-4">
-          <Logo containerClassName="w-12 h-12" />
-          <div>
-            <h1 className="text-lg font-extrabold uppercase leading-none mb-1">Profit & Loss Report</h1>
-            <p className="text-[8px] text-gray-600">Angkor Wat, Siem Reap - 012969798</p>
-          </div>
-        </div>
-        <div className="text-right">
-          <p className="font-bold text-sm">Neary Khmer</p>
-          <p className="text-[8px] text-gray-600">Generated: {formattedDate} at {formattedTime}</p>
+    <div className="flex flex-col items-center text-center mb-6">
+      <div className="flex flex-col items-center gap-2 mb-3">
+        <img src={APP_LOGO} className="w-[25mm] h-auto object-contain mix-blend-multiply" referrerPolicy="no-referrer" crossOrigin="anonymous" />
+        <div className="space-y-0.5">
+          <h1 className="text-lg font-black uppercase tracking-tighter leading-none">Near Khmer</h1>
+          <p className="text-[8px] font-medium text-gray-600 max-w-md">
+            #123, Street 456, Sangkat Boeung Keng Kang I, Khan Chamkarmon, Phnom Penh, Cambodia
+          </p>
+          <p className="text-[8px] font-medium text-gray-600">
+            Contact: +855 12 345 678 / +855 98 765 432
+          </p>
         </div>
       </div>
+      <div className="w-full border-y-2 border-black py-1.5 mt-1">
+        <h2 className="text-sm font-extrabold uppercase tracking-widest">{title}</h2>
+      </div>
+      <div className="w-full flex justify-between mt-1 text-[7px] font-bold text-gray-500 uppercase tracking-widest">
+        <span>Generated: {formattedDate} at {formattedTime}</span>
+        <span>A4 Landscape Report</span>
+      </div>
+    </div>
+  );
+}
+
+function ProfitLossPrintTemplate({ data, summary }: { data: ProfitReportItem[], summary: any }) {
+  return (
+    <div id="profit-loss-template" className="hidden print:block p-4 bg-white text-black font-sans text-[8px] landscape-report">
+      <style>{`
+        @media print {
+          @page { size: A4 landscape; margin: 10mm; }
+          .landscape-report { width: 100%; }
+        }
+      `}</style>
+      
+      <ReportPrintHeader title="Profit & Loss Report" />
 
       {/* Summary Section */}
-      <div className="grid grid-cols-3 gap-4 mb-8 border border-gray-300 p-4 rounded bg-gray-50">
+      <div className="grid grid-cols-6 gap-4 mb-6 border-2 border-black p-4 bg-gray-50">
         <div>
           <p className="text-[8px] font-bold uppercase text-gray-500">Total Revenue</p>
           <p className="text-base font-extrabold">${summary.revenue.toFixed(2)}</p>
@@ -546,32 +748,32 @@ function ProfitLossPrintTemplate({ data, summary }: { data: ProfitReportItem[], 
       </div>
 
       {/* Table */}
-      <table className="w-full border-collapse border border-gray-300 mb-8">
+      <table className="w-full border-collapse border-2 border-black mb-8">
         <thead>
           <tr className="bg-gray-100">
-            <th className="border border-gray-300 p-1 text-left text-[8px] font-bold uppercase">Product</th>
-            <th className="border border-gray-300 p-1 text-left text-[8px] font-bold uppercase">Category</th>
-            <th className="border border-gray-300 p-1 text-center text-[8px] font-bold uppercase">Qty Sold</th>
-            <th className="border border-gray-300 p-1 text-right text-[8px] font-bold uppercase">Price</th>
-            <th className="border border-gray-300 p-1 text-right text-[8px] font-bold uppercase">Cost</th>
-            <th className="border border-gray-300 p-1 text-right text-[8px] font-bold uppercase">Revenue</th>
-            <th className="border border-gray-300 p-1 text-right text-[8px] font-bold uppercase">Total Cost</th>
-            <th className="border border-gray-300 p-1 text-right text-[8px] font-bold uppercase">Profit</th>
-            <th className="border border-gray-300 p-1 text-right text-[8px] font-bold uppercase">Margin %</th>
+            <th className="border border-black p-1 text-left text-[8px] font-bold uppercase">Product</th>
+            <th className="border border-black p-1 text-left text-[8px] font-bold uppercase">Category</th>
+            <th className="border border-black p-1 text-center text-[8px] font-bold uppercase">Qty Sold</th>
+            <th className="border border-black p-1 text-right text-[8px] font-bold uppercase">Price</th>
+            <th className="border border-black p-1 text-right text-[8px] font-bold uppercase">Cost</th>
+            <th className="border border-black p-1 text-right text-[8px] font-bold uppercase">Revenue</th>
+            <th className="border border-black p-1 text-right text-[8px] font-bold uppercase">Total Cost</th>
+            <th className="border border-black p-1 text-right text-[8px] font-bold uppercase">Profit</th>
+            <th className="border border-black p-1 text-right text-[8px] font-bold uppercase">Margin %</th>
           </tr>
         </thead>
         <tbody>
           {data.map((item) => (
             <tr key={item.id}>
-              <td className="border border-gray-300 p-1 font-bold">{item.product}</td>
-              <td className="border border-gray-300 p-1">{item.category}</td>
-              <td className="border border-gray-300 p-1 text-center">{item.qtySold}</td>
-              <td className="border border-gray-300 p-1 text-right">{item.price}</td>
-              <td className="border border-gray-300 p-1 text-right">{item.cost}</td>
-              <td className="border border-gray-300 p-1 text-right">{item.revenue}</td>
-              <td className="border border-gray-300 p-1 text-right">{item.totalCost}</td>
-              <td className="border border-gray-300 p-1 text-right font-bold">{item.profit}</td>
-              <td className="border border-gray-300 p-1 text-right font-bold text-emerald-700">{item.margin}</td>
+              <td className="border border-black p-1 font-bold">{item.product}</td>
+              <td className="border border-black p-1">{item.category}</td>
+              <td className="border border-black p-1 text-center">{item.qtySold}</td>
+              <td className="border border-black p-1 text-right">{item.price}</td>
+              <td className="border border-black p-1 text-right">{item.cost}</td>
+              <td className="border border-black p-1 text-right">{item.revenue}</td>
+              <td className="border border-black p-1 text-right">{item.totalCost}</td>
+              <td className="border border-black p-1 text-right font-bold">{item.profit}</td>
+              <td className="border border-black p-1 text-right font-bold text-emerald-700">{item.margin}</td>
             </tr>
           ))}
         </tbody>
@@ -622,10 +824,10 @@ function TotalSaleReport({ searchQuery, onBack }: { searchQuery: string, onBack:
             <p className="text-sm text-on-surface-variant">View all sales transactions</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <ExportButton icon={<Logo containerClassName="w-4 h-4" />} label="Print" />
-            <ExportButton icon={<BarChart3 className="w-4 h-4" />} label="Excel" />
-            <ExportButton icon={<ReceiptText className="w-4 h-4" />} label="PDF" />
-            <ExportButton icon={<LayoutGrid className="w-4 h-4" />} label="Word" />
+            <ExportButton icon={<Printer className="w-4 h-4" />} label="Print" onClick={() => handlePrintReport('total-sale-template')} />
+            <ExportButton icon={<BarChart3 className="w-4 h-4" />} label="Excel" onClick={() => handleExportToExcel(filteredData, 'Total_Sale_Report')} />
+            <ExportButton icon={<ReceiptText className="w-4 h-4" />} label="PDF" onClick={() => handlePrintReport('total-sale-template')} />
+            <ExportButton icon={<LayoutGrid className="w-4 h-4" />} label="Word" onClick={() => handleExportToWord('total-sale-template', 'Total_Sale_Report')} />
           </div>
         </div>
 
@@ -699,6 +901,71 @@ function TotalSaleReport({ searchQuery, onBack }: { searchQuery: string, onBack:
           ))}
         </div>
       </div>
+
+      {/* Print Template */}
+      <TotalSalePrintTemplate data={filteredData} />
+    </div>
+  );
+}
+
+function TotalSalePrintTemplate({ data }: { data: SaleReportItem[] }) {
+  return (
+    <div id="total-sale-template" className="hidden print:block p-4 bg-white text-black font-sans text-[8px] landscape-report">
+      <style>{`
+        @media print {
+          @page { size: A4 landscape; margin: 10mm; }
+          .landscape-report { width: 100%; }
+        }
+      `}</style>
+      
+      <ReportPrintHeader title="Total Sale Report" />
+
+      <table className="w-full border-collapse border-2 border-black mb-8">
+        <thead>
+          <tr className="bg-gray-100">
+            <th className="border border-black p-1 text-left text-[8px] font-bold uppercase">Date</th>
+            <th className="border border-black p-1 text-left text-[8px] font-bold uppercase">Invoice No</th>
+            <th className="border border-black p-1 text-left text-[8px] font-bold uppercase">Warehouse</th>
+            <th className="border border-black p-1 text-left text-[8px] font-bold uppercase">Customer</th>
+            <th className="border border-black p-1 text-left text-[8px] font-bold uppercase">Table</th>
+            <th className="border border-black p-1 text-left text-[8px] font-bold uppercase">Product</th>
+            <th className="border border-black p-1 text-left text-[8px] font-bold uppercase">Category</th>
+            <th className="border border-black p-1 text-center text-[8px] font-bold uppercase">Qty</th>
+            <th className="border border-black p-1 text-right text-[8px] font-bold uppercase">Price</th>
+            <th className="border border-black p-1 text-right text-[8px] font-bold uppercase">Total</th>
+            <th className="border border-black p-1 text-left text-[8px] font-bold uppercase">Payment</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((item) => (
+            <tr key={item.id}>
+              <td className="border border-black p-1">{item.date}</td>
+              <td className="border border-black p-1 font-mono">{item.invoiceNo}</td>
+              <td className="border border-black p-1">{item.warehouse}</td>
+              <td className="border border-black p-1">{item.customer}</td>
+              <td className="border border-black p-1">{item.table}</td>
+              <td className="border border-black p-1">{item.product}</td>
+              <td className="border border-black p-1">{item.category}</td>
+              <td className="border border-black p-1 text-center">{item.qty} {item.unit !== '-' ? item.unit : ''}</td>
+              <td className="border border-black p-1 text-right">{item.price}</td>
+              <td className="border border-black p-1 text-right font-bold">{item.total}</td>
+              <td className="border border-black p-1">{item.payment}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* Footer */}
+      <div className="flex justify-between mt-16 px-4">
+        <div className="text-center">
+          <p className="mb-12 font-bold uppercase tracking-widest">Verified and Check By</p>
+          <div className="border-t-2 border-black w-48 mx-auto"></div>
+        </div>
+        <div className="text-center">
+          <p className="mb-12 font-bold uppercase tracking-widest">Prepared By</p>
+          <div className="border-t-2 border-black w-48 mx-auto"></div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -755,10 +1022,10 @@ function TotalProductSoldReport({ searchQuery, onBack }: { searchQuery: string, 
             <p className="text-sm text-on-surface-variant">View all products with details</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <ExportButton icon={<Logo containerClassName="w-4 h-4" />} label="Print" onClick={() => window.print()} />
-            <ExportButton icon={<BarChart3 className="w-4 h-4" />} label="Excel" />
-            <ExportButton icon={<ReceiptText className="w-4 h-4" />} label="PDF" />
-            <ExportButton icon={<LayoutGrid className="w-4 h-4" />} label="Word" />
+            <ExportButton icon={<Printer className="w-4 h-4" />} label="Print" onClick={() => handlePrintReport('product-stock-template')} />
+            <ExportButton icon={<BarChart3 className="w-4 h-4" />} label="Excel" onClick={() => handleExportToExcel(filteredData, 'Product_Stock_Report')} />
+            <ExportButton icon={<ReceiptText className="w-4 h-4" />} label="PDF" onClick={() => handlePrintReport('product-stock-template')} />
+            <ExportButton icon={<LayoutGrid className="w-4 h-4" />} label="Word" onClick={() => handleExportToWord('product-stock-template', 'Product_Stock_Report')} />
           </div>
         </div>
 
@@ -825,64 +1092,54 @@ function TotalProductSoldReport({ searchQuery, onBack }: { searchQuery: string, 
 }
 
 function ProductStockPrintTemplate({ data }: { data: ProductSoldReportItem[] }) {
-  const now = new Date();
-  const formattedDate = now.toLocaleDateString();
-  const formattedTime = now.toLocaleTimeString();
-
   return (
-    <div className="hidden print:block p-8 bg-white text-black font-sans text-[10px]">
-      {/* Header */}
-      <div className="flex justify-between items-start mb-6">
-        <div className="flex items-center gap-4">
-          <Logo containerClassName="w-12 h-12" />
-          <div>
-            <h1 className="text-lg font-extrabold uppercase leading-none mb-1">Product Stock Report</h1>
-            <p className="text-[8px] text-gray-600">Angkor Wat, Siem Reap - 012969798</p>
-          </div>
-        </div>
-        <div className="text-right">
-          <p className="font-bold text-sm">Neary Khmer</p>
-          <p className="text-[8px] text-gray-600">Generated: {formattedDate} at {formattedTime}</p>
-        </div>
-      </div>
+    <div id="product-stock-template" className="hidden print:block p-4 bg-white text-black font-sans text-[8px] landscape-report">
+      <style>{`
+        @media print {
+          @page { size: A4 landscape; margin: 10mm; }
+          .landscape-report { width: 100%; }
+        }
+      `}</style>
+
+      <ReportPrintHeader title="Product Stock Report" />
 
       {/* Table */}
-      <table className="w-full border-collapse border border-gray-300 mb-8">
+      <table className="w-full border-collapse border-2 border-black mb-8">
         <thead>
           <tr className="bg-gray-100">
-            <th className="border border-gray-300 p-1 text-left text-[8px] font-bold uppercase">Date</th>
-            <th className="border border-gray-300 p-1 text-left text-[8px] font-bold uppercase">Code</th>
-            <th className="border border-gray-300 p-1 text-left text-[8px] font-bold uppercase">Product Name</th>
-            <th className="border border-gray-300 p-1 text-left text-[8px] font-bold uppercase">Category</th>
-            <th className="border border-gray-300 p-1 text-left text-[8px] font-bold uppercase">Unit</th>
-            <th className="border border-gray-300 p-1 text-center text-[8px] font-bold uppercase">Opening</th>
-            <th className="border border-gray-300 p-1 text-center text-[8px] font-bold uppercase">Issued</th>
-            <th className="border border-gray-300 p-1 text-center text-[8px] font-bold uppercase">Returned</th>
-            <th className="border border-gray-300 p-1 text-center text-[8px] font-bold uppercase">Adjustment</th>
-            <th className="border border-gray-300 p-1 text-center text-[8px] font-bold uppercase">Sold</th>
-            <th className="border border-gray-300 p-1 text-center text-[8px] font-bold uppercase">Closing</th>
-            <th className="border border-gray-300 p-1 text-right text-[8px] font-bold uppercase">Price</th>
-            <th className="border border-gray-300 p-1 text-left text-[8px] font-bold uppercase">Location</th>
-            <th className="border border-gray-300 p-1 text-left text-[8px] font-bold uppercase">Status</th>
+            <th className="border border-black p-1 text-left text-[8px] font-bold uppercase">Date</th>
+            <th className="border border-black p-1 text-left text-[8px] font-bold uppercase">Code</th>
+            <th className="border border-black p-1 text-left text-[8px] font-bold uppercase">Product Name</th>
+            <th className="border border-black p-1 text-left text-[8px] font-bold uppercase">Category</th>
+            <th className="border border-black p-1 text-left text-[8px] font-bold uppercase">Unit</th>
+            <th className="border border-black p-1 text-center text-[8px] font-bold uppercase">Opening</th>
+            <th className="border border-black p-1 text-center text-[8px] font-bold uppercase">Issued</th>
+            <th className="border border-black p-1 text-center text-[8px] font-bold uppercase">Returned</th>
+            <th className="border border-black p-1 text-center text-[8px] font-bold uppercase">Adjustment</th>
+            <th className="border border-black p-1 text-center text-[8px] font-bold uppercase">Sold</th>
+            <th className="border border-black p-1 text-center text-[8px] font-bold uppercase">Closing</th>
+            <th className="border border-black p-1 text-right text-[8px] font-bold uppercase">Price</th>
+            <th className="border border-black p-1 text-left text-[8px] font-bold uppercase">Location</th>
+            <th className="border border-black p-1 text-left text-[8px] font-bold uppercase">Status</th>
           </tr>
         </thead>
         <tbody>
           {data.map((item) => (
             <tr key={item.id}>
-              <td className="border border-gray-300 p-1 whitespace-nowrap">2026-04-04</td>
-              <td className="border border-gray-300 p-1 font-mono">{item.code}</td>
-              <td className="border border-gray-300 p-1 font-bold">{item.productName}</td>
-              <td className="border border-gray-300 p-1">{item.category}</td>
-              <td className="border border-gray-300 p-1">{item.unit}</td>
-              <td className="border border-gray-300 p-1 text-center">{item.opening}</td>
-              <td className="border border-gray-300 p-1 text-center">{item.issued}</td>
-              <td className="border border-gray-300 p-1 text-center">{item.returned}</td>
-              <td className="border border-gray-300 p-1 text-center">{item.adjustment}</td>
-              <td className="border border-gray-300 p-1 text-center">{item.sold}</td>
-              <td className="border border-gray-300 p-1 text-center font-bold">{item.closing}</td>
-              <td className="border border-gray-300 p-1 text-right">{item.price}</td>
-              <td className="border border-gray-300 p-1">{item.location}</td>
-              <td className="border border-gray-300 p-1 text-[7px] font-bold">{item.status}</td>
+              <td className="border border-black p-1 whitespace-nowrap">2026-04-04</td>
+              <td className="border border-black p-1 font-mono">{item.code}</td>
+              <td className="border border-black p-1 font-bold">{item.productName}</td>
+              <td className="border border-black p-1">{item.category}</td>
+              <td className="border border-black p-1 text-center">{item.unit}</td>
+              <td className="border border-black p-1 text-center">{item.opening}</td>
+              <td className="border border-black p-1 text-center">{item.issued}</td>
+              <td className="border border-black p-1 text-center">{item.returned}</td>
+              <td className="border border-black p-1 text-center">{item.adjustment}</td>
+              <td className="border border-black p-1 text-center font-bold">{item.sold}</td>
+              <td className="border border-black p-1 text-center font-bold text-primary">{item.closing}</td>
+              <td className="border border-black p-1 text-right">{item.price}</td>
+              <td className="border border-black p-1">{item.location}</td>
+              <td className="border border-black p-1 text-[7px] font-bold">{item.status}</td>
             </tr>
           ))}
         </tbody>
@@ -891,16 +1148,13 @@ function ProductStockPrintTemplate({ data }: { data: ProductSoldReportItem[] }) 
       {/* Footer */}
       <div className="flex justify-between mt-16 px-4">
         <div className="text-center">
-          <p className="mb-12 font-bold">Verified and Check By:</p>
-          <div className="border-t border-black w-48 mx-auto"></div>
+          <p className="mb-12 font-bold uppercase tracking-widest">Verified and Check By</p>
+          <div className="border-t-2 border-black w-48 mx-auto"></div>
         </div>
         <div className="text-center">
-          <p className="mb-12 font-bold">Prepared By:</p>
-          <div className="border-t border-black w-48 mx-auto"></div>
+          <p className="mb-12 font-bold uppercase tracking-widest">Prepared By</p>
+          <div className="border-t-2 border-black w-48 mx-auto"></div>
         </div>
-      </div>
-      <div className="text-right mt-8 text-[8px] text-gray-500">
-        <p>Page: 1</p>
       </div>
     </div>
   );
@@ -937,10 +1191,10 @@ function TotalIncomeReport({ searchQuery, onBack }: { searchQuery: string, onBac
             <p className="text-sm text-on-surface-variant">Income summary with opening and closing balance</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <ExportButton icon={<Logo containerClassName="w-4 h-4" />} label="Print" />
-            <ExportButton icon={<BarChart3 className="w-4 h-4" />} label="Excel" />
-            <ExportButton icon={<ReceiptText className="w-4 h-4" />} label="PDF" />
-            <ExportButton icon={<LayoutGrid className="w-4 h-4" />} label="Word" />
+            <ExportButton icon={<Printer className="w-4 h-4" />} label="Print" onClick={() => handlePrintReport('total-income-template')} />
+            <ExportButton icon={<BarChart3 className="w-4 h-4" />} label="Excel" onClick={() => handleExportToExcel([summaryData], 'Total_Income_Report')} />
+            <ExportButton icon={<ReceiptText className="w-4 h-4" />} label="PDF" onClick={() => handlePrintReport('total-income-template')} />
+            <ExportButton icon={<LayoutGrid className="w-4 h-4" />} label="Word" onClick={() => handleExportToWord('total-income-template', 'Total_Income_Report')} />
           </div>
         </div>
 
@@ -1021,10 +1275,64 @@ function TotalIncomeReport({ searchQuery, onBack }: { searchQuery: string, onBac
             <BreakdownRow label="Other Income" value={`+$${summaryData.otherIncome.toFixed(2)}`} isPositive />
             <tr className="bg-primary/5">
               <td className="px-6 py-4 text-sm font-bold text-on-surface">Closing Cash (Expected in Drawer)</td>
-              <td className="px-6 py-4 text-sm font-extrabold text-primary text-right">$${summaryData.closingCash.toFixed(2)}</td>
+              <td className="px-6 py-4 text-sm font-extrabold text-primary text-right">${summaryData.closingCash.toFixed(2)}</td>
             </tr>
           </tbody>
         </table>
+      </div>
+
+      {/* Print Template */}
+      <TotalIncomePrintTemplate summary={summaryData} />
+    </div>
+  );
+}
+
+function TotalIncomePrintTemplate({ summary }: { summary: any }) {
+  return (
+    <div id="total-income-template" className="hidden print:block p-4 bg-white text-black font-sans text-[8px] landscape-report">
+      <style>{`
+        @media print {
+          @page { size: A4 landscape; margin: 10mm; }
+          .landscape-report { width: 100%; }
+        }
+      `}</style>
+      
+      <ReportPrintHeader title="Total Income Report" />
+
+      <div className="max-w-2xl mx-auto border-2 border-black p-8 rounded-lg bg-gray-50">
+        <h3 className="text-sm font-bold uppercase tracking-widest mb-6 border-b-2 border-black pb-2">Income Summary Breakdown</h3>
+        <table className="w-full text-left border-collapse">
+          <tbody className="divide-y-2 divide-gray-200">
+            <tr>
+              <td className="py-4 text-sm font-bold uppercase">Opening Cash</td>
+              <td className="py-4 text-sm font-black text-right">${summary.openingCash.toFixed(2)}</td>
+            </tr>
+            <tr>
+              <td className="py-4 text-sm font-bold uppercase text-emerald-700">Total Sale Payments (+)</td>
+              <td className="py-4 text-sm font-black text-right text-emerald-700">+${summary.totalSalePayments.toFixed(2)}</td>
+            </tr>
+            <tr>
+              <td className="py-4 text-sm font-bold uppercase text-emerald-700">Other Income (+)</td>
+              <td className="py-4 text-sm font-black text-right text-emerald-700">+${summary.otherIncome.toFixed(2)}</td>
+            </tr>
+            <tr className="bg-gray-200">
+              <td className="py-4 px-4 text-base font-black uppercase">Closing Cash (Expected)</td>
+              <td className="py-4 px-4 text-base font-black text-right">${summary.closingCash.toFixed(2)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* Footer */}
+      <div className="flex justify-between mt-24 px-4">
+        <div className="text-center">
+          <p className="mb-12 font-bold uppercase tracking-widest">Verified and Check By</p>
+          <div className="border-t-2 border-black w-48 mx-auto"></div>
+        </div>
+        <div className="text-center">
+          <p className="mb-12 font-bold uppercase tracking-widest">Prepared By</p>
+          <div className="border-t-2 border-black w-48 mx-auto"></div>
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 {
-  "name": "Neary Khmer POS",
-  "short_name": "Neary Khmer",
+  "name": "Near Khmer",
+  "short_name": "Near Khmer",
   "description": "Restaurant Management System",
   "start_url": "/",
   "display": "standalone",
@@ -8,13 +8,13 @@
   "theme_color": "#8b5cf6",
   "icons": [
     {
-      "src": "https://ais-pre-occbls3fyipe7qrbf7yzcz-17821723913.asia-southeast1.run.app/logo.png",
+      "src": "https://lh3.googleusercontent.com/d/1uxjJjv_MN0JuVt3a6pr7_HggFzrOIBKB",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "https://ais-pre-occbls3fyipe7qrbf7yzcz-17821723913.asia-southeast1.run.app/logo.png",
+      "src": "https://lh3.googleusercontent.com/d/1uxjJjv_MN0JuVt3a6pr7_HggFzrOIBKB",
       "sizes": "512x512",
       "type": "image/png"
     }

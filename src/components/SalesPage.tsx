@@ -87,7 +87,7 @@ export default function SalesPage() {
       printWindow.document.write('<style>');
       printWindow.document.write('@page { margin: 0; }');
       printWindow.document.write('body { font-family: "Courier New", Courier, monospace; width: 80mm; padding: 4mm; margin: 0; font-size: 12px; line-height: 1.4; color: #000; }');
-      printWindow.document.write('.logo { width: 35mm; height: auto; margin: 0 auto 4mm; display: block; object-fit: contain; mix-blend-mode: multiply; }');
+      printWindow.document.write('.logo { width: 25mm; height: auto; margin: 0 auto 4mm; display: block; object-fit: contain; mix-blend-mode: multiply; }');
       printWindow.document.write('.header { text-align: center; margin-bottom: 6mm; border-bottom: 1px dashed #000; padding-bottom: 4mm; }');
       printWindow.document.write('.header h1 { font-size: 18px; margin: 0 0 2mm; font-weight: bold; }');
       printWindow.document.write('.header p { font-size: 10px; margin: 1mm 0; line-height: 1.2; }');
@@ -103,8 +103,8 @@ export default function SalesPage() {
       printWindow.document.write('</style>');
       printWindow.document.write('</head><body>');
       printWindow.document.write('<div class="header">');
-      printWindow.document.write(`<img src="${APP_LOGO}" class="logo" referrerPolicy="no-referrer" />`);
-      printWindow.document.write('<h1>Neary Khmer POS</h1>');
+      printWindow.document.write(`<img src="${APP_LOGO}" class="logo" referrerPolicy="no-referrer" crossorigin="anonymous" />`);
+      printWindow.document.write('<h1>Near Khmer</h1>');
       printWindow.document.write('<p>#123, Street 456, Sangkat Boeung Keng Kang I,<br/>Khan Chamkarmon, Phnom Penh, Cambodia</p>');
       printWindow.document.write('<p>Contact: +855 12 345 678 / +855 98 765 432</p>');
       printWindow.document.write('</div>');
@@ -127,7 +127,7 @@ export default function SalesPage() {
       printWindow.document.write(`<h3><span>Total Riel:</span> <span>${invoice.totalRiel}</span></h3>`);
       printWindow.document.write('</div>');
       printWindow.document.write('<div class="footer">');
-      printWindow.document.write('<p>Thank you for dining with Neary Khmer!</p>');
+      printWindow.document.write('<p>Thank you for dining with Near Khmer!</p>');
       printWindow.document.write('<p>Please come again!</p>');
       printWindow.document.write('</div>');
       printWindow.document.write('</body></html>');
@@ -244,7 +244,7 @@ export default function SalesPage() {
             onClick={() => handlePrint(selectedInvoice)}
             className="flex-1 primary-gradient text-white h-14 rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-95 transition-all shadow-lg shadow-primary/20"
           >
-            <Logo containerClassName="w-5 h-5" />
+            <Printer className="w-5 h-5" />
             Print Invoice
           </button>
           <button className="px-6 bg-surface-container-low text-red-500 h-14 rounded-2xl font-bold flex items-center justify-center active:scale-95 transition-all">
@@ -325,7 +325,7 @@ export default function SalesPage() {
                 onClick={() => handlePrint(sale)}
                 className="p-2.5 bg-surface-container-low text-on-surface-variant rounded-xl hover:bg-surface-container transition-all active:scale-95"
               >
-                <Logo containerClassName="w-4 h-4" />
+                <Printer className="w-4 h-4" />
               </button>
               <button className="p-2.5 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 transition-all active:scale-95">
                 <Trash2 className="w-4 h-4" />
